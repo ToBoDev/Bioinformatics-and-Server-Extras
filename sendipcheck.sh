@@ -16,7 +16,7 @@ EOF
 
 if [[ ${MYIP} != ${LASTIP} ]]
 then
-	curl -X POST -H 'Content-type: application/json' --data "$ipadd" <INSERT SLACK WEBHOOK URL HERE - details:https://api.slack.com/web>;
+	curl -X POST -H 'Content-type: application/json' --data "$ipadd" <INSERT SLACK WEBHOOK URL HERE - details:https://api.slack.com/messaging/webhooks>;
 	echo ${MYIP} > ${LASTIPFILE}
 fi
 
