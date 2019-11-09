@@ -27,10 +27,10 @@ if [ ! -d "quast" ]; then mkdir quast; fi
       
 #####TRIMMING#####-----------------------------------------------------------
 if test -n "$(find ./raw -maxdepth 1 -name '*R2*' -print -quit)"; then
-    parallel --dryrun -j $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" ` :::+ ` find  ./raw  -name "*_R2*.f*.gz" `
+    parallel -j $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" ` :::+ ` find  ./raw  -name "*_R2*.f*.gz" `
     find ./raw -name "*R1*.gz"* | cut -d "_" -f1 | cut -d "/" -f3 | sort | uniq > popslist
 else
-    parallel --dryrun -j $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" `
+    parallel -j $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" `
     find ./raw -name "*R1*.gz"* | cut -d "_" -f1 | cut -d "/" -f3 | sort | uniq > popslist
 fi 
  
