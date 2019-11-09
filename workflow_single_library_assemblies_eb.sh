@@ -38,14 +38,19 @@ fi
 if test -n "$(find ./raw -maxdepth 1 -name '*R2*' -print -quit)"; then
     echo reverse reads found. proceeding with paired end assembly
     #setspades.R
-    echo "library(here)" > spades_yaml.R
+    echo "if (\"here\" %in% row.names(installed.packages())){" > spades_yaml.R
+    echo "library(here)" >> spades_yaml.R
+    echo "}  else {" >> spades_yaml.R
+    echo "install.packages(\"here\")" >> spades_yaml.R
+    echo "library(here)}" >> spades_yaml.R
     echo "workingdir <- paste0(here(),\"/\")" >> spades_yaml.R
-    echo "popslist <- read.table(paste0(workingdir,\"/popslist\"))" >> spades_yaml.R
+    echo "fwds <- read.table(paste0(workingdir,\"/fwds\"))" >> spades_yaml.R
+    echo "revs <- read.table(paste0(workingdir,\"/revs\"))" >> spades_yaml.R
     echo "setwd(workingdir)" >> spades_yaml.R
     echo "write(paste0('[ \n',  '   { \n', '     orientation: \"fr\", \n', '     type: \"paired-end\", \n', '     right reads: ['), file = \"libraries.yaml\", append = F)" >> spades_yaml.R
-    echo "for(i in 1:nrow(popslist)){write(paste('       \"', workingdir, \"trimming/\", popslist[i,1], '_R1_val_1.fq.gz\",', sep = ''), file = \"libraries.yaml\", append = T)}" >> spades_yaml.R
+    echo "for(i in 1:nrow(fwds)){write(paste0('       \"',fwds[i,1],'\",'), file = \"libraries.yaml\", append = T)}" >> spades_yaml.R
     echo "write(paste0('       ], \n', '       left reads: ['), file = \"libraries.yaml\", append = T)" >> spades_yaml.R
-    echo "for(i in 1:nrow(popslist)){write(paste0('       \"', workingdir,\"trimming/\", popslist[i,1], '_R2_val_2.fq.gz\",'), file = \"libraries.yaml\", append = T)}" >> spades_yaml.R                   
+    echo "for(i in 1:nrow(revs)){write(paste0('       \"',revs[i,1],'\",'), file = \"libraries.yaml\", append = T)}" >> spades_yaml.R                   
     echo "write(paste0('       ] \n', '   } \n', ']'), file = \"libraries.yaml\", append = T)" >> spades_yaml.R
 
     chmod 755 spades_yaml.R
