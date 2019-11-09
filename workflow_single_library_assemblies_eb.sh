@@ -1,7 +1,23 @@
+#! /bin/bash
+
 NUMPROC=30
 MEMORY=225
 PROJ=${PWD##*/}
 USR_KMER="71,81,91,99,121,127"
+
+#suggested file structure
+# project
+# |____raw
+# |   |____genome1
+# |   |____genome2
+# |   |____genome3
+# |   |____...
+# |____fastqc
+# |____assembly
+# |____quast
+# |____etc
+# |____...
+#ddefine resources to use
 
 #Trim galore: 
 #trim adapter seqs, overrep seqs, qual < 20 (also dedup w/ erika's suggestion?)
