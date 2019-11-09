@@ -2,7 +2,7 @@
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # check and send ip address to email
 
-#run this first to match correct grep pattern for your system (i.e. 'iet addr:<IP first 3>', 'eno1', eth1', etc)
+#run this first. may need to edit to match correct grep pattern for your system (i.e. 'iet addr:<IP first 3>', 'eno1', eth1', etc)
 MYIP=`ifconfig | grep 'inet addr:' | awk '{print $2}' | cut -d ":" -f2`;
 TIME=`date`;
 
@@ -16,7 +16,7 @@ EOF
 
 if [[ ${MYIP} != ${LASTIP} ]]
 then
-	curl -X POST -H 'Content-type: application/json' --data "$ipadd" <INSERT SLACK WEBHOOK URL HERE - details:https://api.slack.com/web>;
+	curl -X POST -H 'Content-type: application/json' --data "$ipadd" <INSERT SLACK WEBHOOK URL HERE - details:https://api.slack.com/messaging/webhooks>;
 	echo ${MYIP} > ${LASTIPFILE}
 fi
 
