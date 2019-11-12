@@ -76,7 +76,7 @@ fi
 
 #####QUAST#####-----------------------------------------------------------
 #per KMER
-for genome in `find ./assembly -name "*usr*" -type d | cut -d "/" -f3`; do
+for genome in `find ./assembly -maxdepth 1 -name *$PROJ* -type d | cut -d "/" -f3`; do
     KMERS=(` find ./assembly/$genome/ -maxdepth 1 -name "K*" | cut -d "/" -f4 | sort | uniq `)
     cp ./assembly/${genome}/contigs.fasta ./quast/"${genome}_contigs.fasta"
          for KMER in `find ./assembly/$genome/ -maxdepth 1 -name "K*" | cut -d "/" -f4 | sort | uniq`; do
@@ -93,8 +93,9 @@ quast.py -e -t $NUMPROC -m $MEMORY  "${all_user[@]}" -o ./quast/usr_spades/
 
 #spades default settings
 #all default KMER selection
+
 all_default=(` find ./quast/*default*contigs.fasta  -type f `)
-quast.py -e -t $NUMPROC -m $MEMORY "${all_default[@]}" -o ./quast/default_spades/ 
+quast.py -e -t $NUMPROC -m $MEMORY "${all_default[@]}" -o ./quast/default_spades/  
 
 #########STOP######-----------------------------------------------------------
 #before proceeding: evaluate your quast results. Choose desired de novo, copy to ./assemly with a name to include *chosen.fasta
