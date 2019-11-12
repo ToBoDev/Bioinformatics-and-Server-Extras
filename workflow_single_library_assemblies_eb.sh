@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 NUMPROC=30
 MEMORY=225
