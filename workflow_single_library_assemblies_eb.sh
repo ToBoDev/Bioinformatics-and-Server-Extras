@@ -27,11 +27,11 @@ if [ ! -d "quast" ]; then mkdir quast; fi
       
 #####TRIMMING#####-----------------------------------------------------------
 if test -n "$(find ./raw -maxdepth 1 -name '*R2*' -print -quit)"; then
-    parallel -j $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" ` :::+ ` find  ./raw  -name "*_R2*.f*.gz" `
-    find ./raw -name "*R1*.gz"* | cut -d "_" -f1 | cut -d "/" -f3 | sort | uniq > popslist
+    parallel -j  $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" ` :::+ ` find  ./raw  -name "*_R2*.f*.gz" `
+    find ./raw -name "*R1*.gz"* | sort | uniq > fwds
+    find ./raw -name "*R2*.gz"* | sort | uniq > revs
 else
-    parallel -j $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" `
-    find ./raw -name "*R1*.gz"* | cut -d "_" -f1 | cut -d "/" -f3 | sort | uniq > popslist
+   parallel  -j $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" `
 fi 
  
 #####SPADES ASSEMBLY#####
