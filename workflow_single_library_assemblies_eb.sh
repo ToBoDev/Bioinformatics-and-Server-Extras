@@ -57,7 +57,7 @@ if test -n "$(find ./raw -maxdepth 1 -name '*R2*' -print -quit)"; then
     Rscript spades_yaml.R
 
     #paired-end assembly
-    spades.py --dataset libraries.yaml -k "${USR_KMER[@]}" --careful -t 30 -m 300 -o ./assembly/$PROJ_usr_kmer
+    spades.py --dataset libraries.yaml -k "${USR_KMER[@]}" --careful $NUMPROC -m $MEMORY -o ./assembly/$PROJ_usr_kmer
     spades.py --dataset libraries.yaml --careful -t $NUMPROC -m $MEMORY -o ./assembly/$PROJ_default_kmer
 else
     echo no reverse reads found. proceeding with single end assebmly
