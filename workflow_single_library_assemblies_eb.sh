@@ -27,9 +27,9 @@ if [ ! -d "quast" ]; then mkdir quast; fi
       
 #####TRIMMING#####-----------------------------------------------------------
 if test -n "$(find ./raw -name '*R2*' -print -quit)"; then
-    parallel -j  $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*2291*_R1*.f*.gz" ` :::+ ` find  ./raw  -name "*2291*_R2*.f*.gz" `
+    parallel -j $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" ` :::+ ` find  ./raw  -name "*_R2*.f*.gz" `
     FWDS=`find ./trimming -name "*R1*.gz" | sort | uniq`
-    #REVS=`find ./trimming -name "*R2*.gz" | sort | uniq`
+    REVS=(` find ./trimming -name "*R2*.gz" | sort | uniq `)
 else
    parallel -j $NUMPROC trim_galore --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" `
    FWDS=`find ./trimming -name "*R1*.gz" | sort | uniq`
@@ -40,14 +40,17 @@ if test -n "$(find ./raw -name '*R2*' -print -quit)"; then
     echo reverse reads found. proceeding with paired end assembly using $NUMPROC cores and $MEMORY GB memory
     for file1 in $FWDS; do
         file2=${file1/R1_001_val_1/R2_001_val_2}
-        outname="${file1/_*_R*.fq.gz/}_output"
-        spades.py --careful -k 71,81,91,99,121,127 -1 $file1 -2 $file2 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_usr_kmer
+        tempname="${file1/.\/trimming\//}"
+        outname="${tempname/_*_R*.fq.gz/}_output"
+        echo $outname
+        spades.py --careful -k 71,81,91,99,121,127 -1 $file1 -2 $file2 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_usr_kmer 
         spades.py --careful -1 $file1 -2 $file2 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_default_kmer
     done
 else
     echo no reverse reads found. proceeding with single end assebmly using $NUMPROC cores and $MEMORY GB memory
     for file1 in $FWDS; do
-        outname="${file1/_*_R*.fq.gz/}_output"
+        tempname="${file1/.\/trimming\//}"
+        outname="${tempname/_*_R*.fq.gz/}_output"
         spades.py --careful -k 71,81,91,99,121,127 -1 $file1 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_usr_kmer
         spades.py --careful -1 $file1 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_default_kmer
     done
