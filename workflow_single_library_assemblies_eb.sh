@@ -26,52 +26,31 @@ if [ ! -d "assembly" ]; then mkdir assembly; fi
 if [ ! -d "quast" ]; then mkdir quast; fi
       
 #####TRIMMING#####-----------------------------------------------------------
-if test -n "$(find ./raw -maxdepth 1 -name '*R2*' -print -quit)"; then
-    parallel -j  $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" ` :::+ ` find  ./raw  -name "*_R2*.f*.gz" `
-    find ./raw -name "*R1*.gz"* | sort | uniq > fwds
-    find ./raw -name "*R2*.gz"* | sort | uniq > revs
+if test -n "$(find ./raw -name '*R2*' -print -quit)"; then
+    parallel -j  $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*2291*_R1*.f*.gz" ` :::+ ` find  ./raw  -name "*2291*_R2*.f*.gz" `
+    FWDS=`find ./trimming -name "*R1*.gz" | sort | uniq`
+    #REVS=`find ./trimming -name "*R2*.gz" | sort | uniq`
 else
-   parallel  -j $NUMPROC trim_galore --paired --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" `
+   parallel -j $NUMPROC trim_galore --illumina --fastqc -o trimming/ ::: ` find  ./raw  -name "*_R1*.f*.gz" `
+   FWDS=`find ./trimming -name "*R1*.gz" | sort | uniq`
 fi 
  
 #####SPADES ASSEMBLY#####
-if test -n "$(find ./raw -maxdepth 1 -name '*R2*' -print -quit)"; then
-    echo reverse reads found. proceeding with paired end assembly
-    #setspades.R
-    echo "if (\"here\" %in% row.names(installed.packages())){" > spades_yaml.R
-    echo "library(here)" >> spades_yaml.R
-    echo "}  else {" >> spades_yaml.R
-    echo "install.packages(\"here\")" >> spades_yaml.R
-    echo "library(here)}" >> spades_yaml.R
-    echo "workingdir <- paste0(here(),\"/\")" >> spades_yaml.R
-    echo "fwds <- read.table(paste0(workingdir,\"/fwds\"))" >> spades_yaml.R
-    echo "revs <- read.table(paste0(workingdir,\"/revs\"))" >> spades_yaml.R
-    echo "setwd(workingdir)" >> spades_yaml.R
-    echo "write(paste0('[ \n',  '   { \n', '     orientation: \"fr\", \n', '     type: \"paired-end\", \n', '     right reads: ['), file = \"libraries.yaml\", append = F)" >> spades_yaml.R
-    echo "for(i in 1:nrow(fwds)){write(paste0('       \"',fwds[i,1],'\",'), file = \"libraries.yaml\", append = T)}" >> spades_yaml.R
-    echo "write(paste0('       ], \n', '       left reads: ['), file = \"libraries.yaml\", append = T)" >> spades_yaml.R
-    echo "for(i in 1:nrow(revs)){write(paste0('       \"',revs[i,1],'\",'), file = \"libraries.yaml\", append = T)}" >> spades_yaml.R                   
-    echo "write(paste0('       ] \n', '   } \n', ']'), file = \"libraries.yaml\", append = T)" >> spades_yaml.R
-
-    chmod 755 spades_yaml.R
-    Rscript spades_yaml.R
-
-    #paired-end assembly
-    spades.py --dataset libraries.yaml -k "${USR_KMER[@]}" --careful $NUMPROC -m $MEMORY -o ./assembly/$PROJ_usr_kmer
-    spades.py --dataset libraries.yaml --careful -t $NUMPROC -m $MEMORY -o ./assembly/$PROJ_default_kmer
+if test -n "$(find ./raw -name '*R2*' -print -quit)"; then
+    echo reverse reads found. proceeding with paired end assembly using $NUMPROC cores and $MEMORY GB memory
+    for file1 in $FWDS; do
+        file2=${file1/R1_001_val_1/R2_001_val_2}
+        outname="${file1/_*_R*.fq.gz/}_output"
+        spades.py --careful -k 71,81,91,99,121,127 -1 $file1 -2 $file2 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_usr_kmer
+        spades.py --careful -1 $file1 -2 $file2 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_default_kmer
+    done
 else
-    echo no reverse reads found. proceeding with single end assebmly
-    #single end assembly
-    pools=(` find ./trimming -name "*R1*.gz" | sort | uniq | cat `) 
-    libnum=( `seq 1 "${#pools[@]}"` )
-    libnum=("${libnum[@]/#/--s}")
-    unset reads
-    for (( i=0; i<${#libnum[*]}; ++i)); do reads+=( ${libnum[$i]} ${pools[$i]} ); done
-    #kmers="$(seq -s ',' 21 2 127)"
-    #spades.py "${reads[@]}" -k "$kmers" --careful -t $NUMPROC -m $MEMORY -o ./assembly/ipyRAD_all_kmer_output
-
-    spades.py "${reads[@]}" -k "${USR_KMER[@]}" --careful -t $NUMPROC -m $MEMORY -o ./assembly/${PROJ}usr_kmer
-    spades.py "${reads[@]}" --careful -t $NUMPROC -m $MEMORY -o ./assembly/${PROJ}_default_kmer
+    echo no reverse reads found. proceeding with single end assebmly using $NUMPROC cores and $MEMORY GB memory
+    for file1 in $FWDS; do
+        outname="${file1/_*_R*.fq.gz/}_output"
+        spades.py --careful -k 71,81,91,99,121,127 -1 $file1 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_usr_kmer
+        spades.py --careful -1 $file1 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_default_kmer
+    done
 fi
 
 #####QUAST#####-----------------------------------------------------------
