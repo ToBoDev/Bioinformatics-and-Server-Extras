@@ -1,9 +1,9 @@
 #!/bin/bash
 
-NUMPROC=30
-MEMORY=225
+NUMPROC=48
+MEMORY=350
 PROJ=${PWD##*/}
-USR_KMER="71,81,91,99,121,127"
+#USR_KMER="71,81,91,99,121,127"
 
 #suggested file structure
 # project
@@ -43,7 +43,7 @@ if test -n "$(find ./raw -name '*R2*' -print -quit)"; then
         tempname="${file1/.\/trimming\//}"
         outname="${tempname/_*_R*.fq.gz/}_output"
         echo $outname
-        spades.py --careful -k 71,81,91,99,121,127 -1 $file1 -2 $file2 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_usr_kmer 
+        #spades.py --careful -k 71,81,91,99,121,127 -1 $file1 -2 $file2 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_usr_kmer 
         spades.py --careful -1 $file1 -2 $file2 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_default_kmer
     done
 else
@@ -51,14 +51,14 @@ else
     for file1 in $FWDS; do
         tempname="${file1/.\/trimming\//}"
         outname="${tempname/_*_R*.fq.gz/}_output"
-        spades.py --careful -k 71,81,91,99,121,127 -1 $file1 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_usr_kmer
+        #spades.py --careful -k 71,81,91,99,121,127 -1 $file1 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_usr_kmer
         spades.py --careful -1 $file1 -t $NUMPROC -m $MEMORY -o ./assembly/${outname}_default_kmer
     done
 fi
 
 #####QUAST#####-----------------------------------------------------------
 #per KMER
-for genome in `find ./assembly -maxdepth 1 -name *$PROJ* -type d | cut -d "/" -f3`; do
+for genome in `find ./assembly -maxdepth 1 -name "*kmer" -type d | cut -d "/" -f3`; do
     KMERS=(` find ./assembly/$genome/ -maxdepth 1 -name "K*" | cut -d "/" -f4 | sort | uniq `)
     cp ./assembly/${genome}/contigs.fasta ./quast/"${genome}_contigs.fasta"
          for KMER in `find ./assembly/$genome/ -maxdepth 1 -name "K*" | cut -d "/" -f4 | sort | uniq`; do
@@ -70,8 +70,8 @@ for genome in `find ./assembly -maxdepth 1 -name *$PROJ* -type d | cut -d "/" -f
 done
 
 #all default KMER selection
-all_user=(` find ./quast/*usr*contigs.fasta  -type f `)
-quast.py -e -t $NUMPROC -m $MEMORY  "${all_user[@]}" -o ./quast/usr_spades/
+#all_user=(` find ./quast/*usr*contigs.fasta  -type f `)
+#quast.py -e -t $NUMPROC -m $MEMORY  "${all_user[@]}" -o ./quast/usr_spades/
 
 #spades default settings
 #all default KMER selection
