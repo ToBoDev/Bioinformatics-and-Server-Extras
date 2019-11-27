@@ -81,16 +81,16 @@ fi
 #all default KMER selection
 
 #copy over contig outputs for 
-parallel -j $NUMPROC cp ./assembly/{}/contigs.fasta ./quast_test/{}_contigs.fasta ::: \
+parallel -j $NUMPROC cp ./assembly/{}/contigs.fasta ./quast/{}_contigs.fasta ::: \
 ` find ./assembly -maxdepth 1 -type d | sort | uniq | cut -d "/" -f3 `
 
-all_default=(` find ./quast_test/*contigs.fasta  -type f `)
+all_default=(` find ./quast/*contigs.fasta  -type f `)
 
 if [ $G_size = "EUK" ]; then
-    quast.py --large -e -k -t $NUMPROC -m $MEMORY "${all_default[@]}" -o ./quast_test/default_spades/  ; fi
+    quast.py --large -e -k -t $NUMPROC -m $MEMORY "${all_default[@]}" -o ./quast/default_spades/  ; fi
 
 if [ $G_size = "PRO" ]; then
-    quast.py --gene-finding -b -t $NUMPROC -m $MEMORY "${all_default[@]}" -o ./quast_test/default_spades/  ; fi
+    quast.py --gene-finding -b -t $NUMPROC -m $MEMORY "${all_default[@]}" -o ./quast/default_spades/  ; fi
 
 #########STOP######-----------------------------------------------------------
 #before proceeding: evaluate your quast results. Choose desired de novo, copy to ./assemly with a name to include *chosen.fasta
