@@ -16,8 +16,9 @@ EOF
 
 if [[ ${MYIP} != ${LASTIP} ]]
 then
-	curl -X POST -H 'Content-type: application/json' --data "$ipadd" <INSERT SLACK WEBHOOK URL HERE - details:https://api.slack.com/messaging/webhooks>;
+	curl -k w-X POST -H 'Content-type: application/json' --data "$ipadd" <INSERT SLACK WEBHOOK URL HERE - details:https://api.slack.com/messaging/webhooks>;
 	echo ${MYIP} > ${LASTIPFILE}
 fi
 
+#replace the <> and everything in them with your slack webhook url
 #save this script somewhere on your server and add it as a cronjob! It should send a ping to your specified slack channel whenever you IP address changes (such as during power outages)
