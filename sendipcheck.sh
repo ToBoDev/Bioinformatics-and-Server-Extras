@@ -6,7 +6,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 MYIP=`ifconfig | grep 'inet addr:' | awk '{print $2}' | cut -d ":" -f2`;
 TIME=`date`;
 
-LASTIPFILE='/.last_ip_addr';
+LASTIPFILE='~/.last_ip_addr';
 LASTIP=`cat ${LASTIPFILE}`
 
 ipadd=$(cat <<EOF 
